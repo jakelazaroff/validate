@@ -205,9 +205,4 @@ describe("optional", () => {
     assert.doesNotThrow(() => v.parse(schema, "jake"));
     assert.doesNotThrow(() => v.parse(schema, undefined));
   });
-
-  test("asfd", () => {
-    const schema = v.object({ test: v.optional(v.string) });
-    const foo = v.parse(schema, { test: "jake" });
-  });
 });

@@ -79,7 +79,7 @@ function schema(validate) {
   return {
     [NS]: {
       version: 1,
-      vendor: "",
+      vendor: "jsparse",
       validate,
     },
   };
@@ -94,6 +94,7 @@ function schema(validate) {
 const v = (schm, input) => schm[NS].validate(input);
 
 /**
+ * Creates a schema from a type predicate.
  * @template [Input = unknown]
  * @template [Output = Input]
  * @param {(value: unknown) => value is Output} fn The validation function.
@@ -121,9 +122,10 @@ function formatErrorFor(expected) {
   return (actual) => formatError(expected, actual);
 }
 
-const _undefined = custom((x) => x === undefined, formatErrorFor("undefined"));
+// schemata for `null` and `undefined` (defined in a way that avoids shadowing built-ins)
 const _null = custom((x) => x === null, formatErrorFor("null"));
-export { _undefined as undefined, _null as null };
+const _undefined = custom((x) => x === undefined, formatErrorFor("undefined"));
+export { _null as null, _undefined as undefined };
 
 export const bigint = custom((x) => typeof x === "bigint", formatErrorFor("bigint"));
 export const boolean = custom((x) => typeof x === "boolean", formatErrorFor("boolean"));
@@ -134,6 +136,28 @@ export const any = custom(
   /** @returns {_ is any} */ (_) => true,
   () => "",
 );
+
+/**
+ * @template const T
+ * @param {T} lit
+ */
+export const literal = (lit) =>
+  custom(
+    /** @returns {v is T} */
+    (val) => val === lit,
+    formatErrorFor(`\`${lit}\``),
+  );
+
+/**
+ * @template {Function} T
+ * @param {T} fn
+ */
+export const instance = (fn) =>
+  custom(
+    /** @returns {v is InstanceType<T>} */
+    (v) => v instanceof fn,
+    formatErrorFor(`instance of ${fn.name}`),
+  );
 
 /**
  * @template {StandardSchemaV1[]} T
@@ -163,9 +187,15 @@ export const union = (...schemata) => {
  */
 
 /**
+ * Simplifies an intersection type into a single object type
+ * @template T
+ * @typedef {T extends infer O ? { [K in keyof O]: O[K] } : never} Simplify
+ */
+
+/**
  * @template {StandardSchemaV1[]} T
  * @param {T} schemata
- * @returns {StandardSchemaV1<unknown, UnionToIntersection<InferOutput<T[number]>>>}
+ * @returns {StandardSchemaV1<unknown, Simplify<UnionToIntersection<InferOutput<T[number]>>>>}
  */
 export const intersect = (...schemata) => {
   return schema((value) => {
@@ -192,28 +222,6 @@ export const optional = (schm) => union(_undefined, schm);
  * @param {T} schm
  */
 export const nullable = (schm) => union(_null, schm);
-
-/**
- * @template T
- * @param {T} lit
- */
-export const literal = (lit) =>
-  custom(
-    /** @returns {v is T} */
-    (v) => v === lit,
-    formatErrorFor(`\`${lit}\``),
-  );
-
-/**
- * @template {Function} T
- * @param {T} fn
- */
-export const instance = (fn) =>
-  custom(
-    /** @returns {v is InstanceType<T>} */
-    (v) => v instanceof fn,
-    formatErrorFor(`instance of ${fn.name}`),
-  );
 
 /**
  * @template T
@@ -250,7 +258,10 @@ function isObject(input) {
 /**
  * @template {{ [key: PropertyKey]: StandardSchemaV1}} T
  * @param {T} schm
- * @returns {StandardSchemaV1<unknown, { [K in keyof T]: InferOutput<T[K]> }>}
+ * @returns {StandardSchemaV1<unknown, Simplify<
+ *   { [K in keyof T as undefined extends InferOutput<T[K]> ? never : K]: InferOutput<T[K]> } &
+ *   { [K in keyof T as undefined extends InferOutput<T[K]> ? K : never]?: InferOutput<T[K]> }
+ * >>}
  */
 export const object = (schm) => {
   return schema((value) => {
