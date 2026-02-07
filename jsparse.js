@@ -2,51 +2,50 @@
 // See https://standardschema.dev
 
 /**
- * @template [Input = unknown]
- * @template [Output = Input]
- * @typedef {{ readonly "~standard": Props<Input, Output> }} StandardSchemaV1 The Standard Schema interface.
- * See https://standardschema.dev.
+ * @template [Input=unknown]
+ * @template [Output=Input]
+ * @typedef {{ readonly "~standard": Props<Input, Output> }} StandardSchemaV1
  */
 
 /**
- * @template [Input = unknown]
- * @template [Output = Input]
- * @typedef {object} Props The Standard Schema properties interface.
- * @property {1} version The version number of the standard.
- * @property {string} vendor The vendor name of the schema library.
- * @property {(value: unknown) => Result<Output>} validate Validates unknown input values.
- * @property {Types<Input, Output> | undefined} [types] Inferred types associated with the schema.
- */
-
-/**
- * @template Output
- * @typedef {SuccessResult<Output> | FailureResult} Result The result interface of the validate function.
+ * @template [Input=unknown]
+ * @template [Output=Input]
+ * @typedef {object} Props
+ * @property {1} version
+ * @property {string} vendor
+ * @property {(value: unknown) => Result<Output>} validate
+ * @property {Types<Input, Output> | undefined} [types]
  */
 
 /**
  * @template Output
- * @typedef {object} SuccessResult The result interface if validation succeeds.
- * @property {Output} value The typed output value.
- * @property {undefined} [issues] The non-existent issues.
+ * @typedef {SuccessResult<Output> | FailureResult} Result
  */
 
 /**
- * @typedef {object} FailureResult The result interface if validation fails.
- * @property {ReadonlyArray<Issue>} issues The issues of failed validation.
+ * @template Output
+ * @typedef {object} SuccessResult
+ * @property {Output} value
+ * @property {undefined} [issues]
  */
 
 /**
- * @typedef {object} Issue The issue interface of the failure output.
- * @property {string} message The error message of the issue.
- * @property {ReadonlyArray<PropertyKey>} [path] The path of the issue, if any.
+ * @typedef {object} FailureResult
+ * @property {ReadonlyArray<Issue>} issues
  */
 
 /**
- * @template [Input = unknown]
- * @template [Output = Input]
- * @typedef {object} Types The Standard Schema types interface.
- * @property {Input} input The input type of the schema.
- * @property {Output} output The output type of the schema.
+ * @typedef {object} Issue
+ * @property {string} message
+ * @property {ReadonlyArray<PropertyKey>} [path]
+ */
+
+/**
+ * @template [Input=unknown]
+ * @template [Output=Input]
+ * @typedef {object} Types
+ * @property {Input} input
+ * @property {Output} output
  */
 
 /**
@@ -56,33 +55,33 @@
 
 // IMPLEMENTATION
 
-const NS = "~standard";
+const NS = "~standard"
 
 class SchemaError extends Error {
-  /** @param {readonly Issue[]} issues */
-  constructor(issues) {
-    const msg = issues
-      .map(({ message, path }) => (path.length ? `- $.${path.join(".")}: ${message}` : message))
-      .join("\n");
-    super(msg);
-  }
+	/** @param {readonly Issue[]} issues */
+	constructor(issues) {
+		const msg = issues
+			.map(({message, path}) => (path.length ? `- $.${path.join(".")}: ${message}` : message))
+			.join("\n")
+		super(msg)
+	}
 }
 
 /**
  * Creates a schema from a validation function.
- * @template [Input = unknown]
- * @template [Output = Input]
+ * @template [Input=unknown]
+ * @template [Output=Input]
  * @param {(input: any) => Result<Output>} validate The validation function.
  * @returns {StandardSchemaV1<Input, Output>}
  */
 function schema(validate) {
-  return {
-    [NS]: {
-      version: 1,
-      vendor: "jsparse",
-      validate,
-    },
-  };
+	return {
+		[NS]: {
+			version: 1,
+			vendor: "jsparse",
+			validate
+		}
+	}
 }
 
 /**
@@ -91,73 +90,73 @@ function schema(validate) {
  * @param {StandardSchemaV1<any, T>} schm
  * @param {any} input
  */
-const v = (schm, input) => schm[NS].validate(input);
+const v = (schm, input) => schm[NS].validate(input)
 
 /**
  * Creates a schema from a type predicate.
- * @template [Input = unknown]
- * @template [Output = Input]
+ * @template [Input=unknown]
+ * @template [Output=Input]
  * @param {(value: unknown) => value is Output} fn The validation function.
  * @param {(value: unknown) => string} msg
  * @returns {StandardSchemaV1<Input, Output>}
  */
 export function custom(fn, msg) {
-  return schema((value) => {
-    if (fn(value)) return { value };
-    return { issues: [{ message: msg(value), path: [] }] };
-  });
+	return schema(value => {
+		if (fn(value)) return {value}
+		return {issues: [{message: msg(value), path: []}]}
+	})
 }
 
 /**
- * @param {string} expected
- * @param {string} actual
+ * @param {string} e Expected type
+ * @param {string} a Actual type
  */
-function formatError(expected, actual) {
-  return `Expected ${expected}, received \`${JSON.stringify(actual)}\``;
+function formatErr(e, a) {
+	return `Expected ${e}, received \`${JSON.stringify(a)}\``
 }
 
-/** @param {string} expected */
-function formatErrorFor(expected) {
-  /** @param {any} actual */
-  return (actual) => formatError(expected, actual);
+/** @param {string} e Expected type */
+function formatErrFor(e) {
+	/** @param {any} a */
+	return a => formatErr(e, a)
 }
 
 // schemata for `null` and `undefined` (defined in a way that avoids shadowing built-ins)
-const _null = custom((x) => x === null, formatErrorFor("null"));
-const _undefined = custom((x) => x === undefined, formatErrorFor("undefined"));
-export { _null as null, _undefined as undefined };
+const _null = custom(x => x === null, formatErrFor("null"))
+const _undefined = custom(x => x === undefined, formatErrFor("undefined"))
+export {_null as null, _undefined as undefined}
 
-export const bigint = custom((x) => typeof x === "bigint", formatErrorFor("bigint"));
-export const boolean = custom((x) => typeof x === "boolean", formatErrorFor("boolean"));
-export const number = custom((x) => typeof x === "number", formatErrorFor("number"));
-export const string = custom((x) => typeof x === "string", formatErrorFor("string"));
-export const symbol = custom((x) => typeof x === "symbol", formatErrorFor("symbol"));
+export const bigint = custom(x => typeof x === "bigint", formatErrFor("bigint"))
+export const boolean = custom(x => typeof x === "boolean", formatErrFor("boolean"))
+export const number = custom(x => typeof x === "number", formatErrFor("number"))
+export const string = custom(x => typeof x === "string", formatErrFor("string"))
+export const symbol = custom(x => typeof x === "symbol", formatErrFor("symbol"))
 export const any = custom(
-  /** @returns {_ is any} */ (_) => true,
-  () => "",
-);
+	/** @returns {_ is any} */ _ => true,
+	() => ""
+)
 
 /**
  * @template const T
  * @param {T} lit
  */
-export const literal = (lit) =>
-  custom(
-    /** @returns {v is T} */
-    (val) => val === lit,
-    formatErrorFor(`\`${lit}\``),
-  );
+export const literal = lit =>
+	custom(
+		/** @returns {v is T} */
+		val => val === lit,
+		formatErrFor(`\`${lit}\``)
+	)
 
 /**
  * @template {Function} T
  * @param {T} fn
  */
-export const instance = (fn) =>
-  custom(
-    /** @returns {v is InstanceType<T>} */
-    (v) => v instanceof fn,
-    formatErrorFor(`instance of ${fn.name}`),
-  );
+export const instance = fn =>
+	custom(
+		/** @returns {v is InstanceType<T>} */
+		v => v instanceof fn,
+		formatErrFor(`instance of ${fn.name}`)
+	)
 
 /**
  * @template {StandardSchemaV1[]} T
@@ -165,19 +164,19 @@ export const instance = (fn) =>
  * @returns {StandardSchemaV1<unknown, InferOutput<T[number]>>}
  */
 export const union = (...schemata) => {
-  return schema((input) => {
-    /** @type {Issue[]} */
-    let issues = [];
+	return schema(input => {
+		/** @type {Issue[]} */
+		let issues = []
 
-    for (const schm of schemata) {
-      const result = v(schm, input);
-      if (!result.issues) return result;
-      issues = issues.concat(result.issues);
-    }
+		for (const schm of schemata) {
+			const result = v(schm, input)
+			if (!result.issues) return result
+			issues = issues.concat(result.issues)
+		}
 
-    return { issues };
-  });
-};
+		return {issues}
+	})
+}
 
 /**
  * Converts a union type to an intersection type;
@@ -198,61 +197,61 @@ export const union = (...schemata) => {
  * @returns {StandardSchemaV1<unknown, Simplify<UnionToIntersection<InferOutput<T[number]>>>>}
  */
 export const intersect = (...schemata) => {
-  return schema((value) => {
-    /** @type {Issue[]} */
-    let issues = [];
+	return schema(value => {
+		/** @type {Issue[]} */
+		let issues = []
 
-    for (const schm of schemata) {
-      const result = v(schm, value);
-      if (result.issues) issues = issues.concat(result.issues);
-    }
+		for (const schm of schemata) {
+			const result = v(schm, value)
+			if (result.issues) issues = issues.concat(result.issues)
+		}
 
-    return issues.length ? { issues } : { value };
-  });
-};
-
-/**
- * @template {StandardSchemaV1} T
- * @param {T} schm
- */
-export const optional = (schm) => union(_undefined, schm);
+		return issues.length ? {issues} : {value}
+	})
+}
 
 /**
  * @template {StandardSchemaV1} T
  * @param {T} schm
  */
-export const nullable = (schm) => union(_null, schm);
+export const optional = schm => union(_undefined, schm)
+
+/**
+ * @template {StandardSchemaV1} T
+ * @param {T} schm
+ */
+export const nullable = schm => union(_null, schm)
 
 /**
  * @template T
  * @param {StandardSchemaV1<unknown, T>} schm
  * @returns {StandardSchemaV1<unknown, T[]>}
  */
-export const array = (schm) => {
-  return schema((input) => {
-    if (!Array.isArray(input)) return { issues: [{ message: formatError("array", input) }] };
+export const array = schm => {
+	return schema(input => {
+		if (!Array.isArray(input)) return {issues: [{message: formatErr("array", input)}]}
 
-    /** @type {Issue[]} */
-    const issues = [];
+		/** @type {Issue[]} */
+		const issues = []
 
-    for (const [i, val] of input.entries()) {
-      const result = v(schm, val);
-      if (result.issues) {
-        for (const issue of result.issues) {
-          issue.path = /** @type {PropertyKey[]} */ ([i]).concat(issue.path || []);
-          issues.push(issue);
-        }
-      }
-    }
+		for (const [i, val] of input.entries()) {
+			const result = v(schm, val)
+			if (result.issues) {
+				for (const issue of result.issues) {
+					issue.path = /** @type {PropertyKey[]} */ ([i]).concat(issue.path || [])
+					issues.push(issue)
+				}
+			}
+		}
 
-    if (issues.length) return { issues };
-    return /** @type {SuccessResult<typeof values>} */ ({ value: input });
-  });
-};
+		if (issues.length) return {issues}
+		return /** @type {SuccessResult<typeof values>} */ ({value: input})
+	})
+}
 
 /** @param {any} input */
 function isObject(input) {
-  return typeof input === "object" && input !== null && !Array.isArray(input);
+	return typeof input === "object" && input !== null && !Array.isArray(input)
 }
 
 /**
@@ -263,74 +262,74 @@ function isObject(input) {
  *   { [K in keyof T as undefined extends InferOutput<T[K]> ? K : never]?: InferOutput<T[K]> }
  * >>}
  */
-export const object = (schm) => {
-  return schema((value) => {
-    if (!isObject(value)) return { issues: [{ message: formatError("object", value) }] };
+export const object = schm => {
+	return schema(value => {
+		if (!isObject(value)) return {issues: [{message: formatErr("object", value)}]}
 
-    /** @type {Issue[]} */
-    const issues = [];
+		/** @type {Issue[]} */
+		const issues = []
 
-    for (const [key, subschm] of Object.entries(schm)) {
-      const result = v(subschm, value[key]);
-      if (result.issues) {
-        for (const issue of result.issues || []) {
-          issue.path = /** @type {[PropertyKey]} */ ([key]).concat(issue.path || []);
-          issues.push(issue);
-        }
-      }
-    }
+		for (const [key, subschm] of Object.entries(schm)) {
+			const result = v(subschm, value[key])
+			if (result.issues) {
+				for (const issue of result.issues || []) {
+					issue.path = /** @type {[PropertyKey]} */ ([key]).concat(issue.path || [])
+					issues.push(issue)
+				}
+			}
+		}
 
-    return issues.length ? { issues } : { value };
-  });
-};
+		return issues.length ? {issues} : {value}
+	})
+}
 
 /**
  * @template T
  * @param {StandardSchemaV1<unknown, T>} schm
  * @returns {StandardSchemaV1<unknown, { [key: PropertyKey]: T }>}
  */
-export const record = (schm) => {
-  return schema((value) => {
-    if (!isObject(value)) return { issues: [{ message: formatError("object", value) }] };
+export const record = schm => {
+	return schema(value => {
+		if (!isObject(value)) return {issues: [{message: formatErr("object", value)}]}
 
-    /** @type {Issue[]} */
-    const issues = [];
+		/** @type {Issue[]} */
+		const issues = []
 
-    for (const [key, val] of Object.entries(value)) {
-      const result = v(schm, val);
-      if (result.issues) {
-        for (const issue of result.issues || []) {
-          issue.path = /** @type {[PropertyKey]} */ ([key]).concat(issue.path || []);
-          issues.push(issue);
-        }
-      }
-    }
+		for (const [key, val] of Object.entries(value)) {
+			const result = v(schm, val)
+			if (result.issues) {
+				for (const issue of result.issues || []) {
+					issue.path = /** @type {[PropertyKey]} */ ([key]).concat(issue.path || [])
+					issues.push(issue)
+				}
+			}
+		}
 
-    return issues.length ? { issues } : { value };
-  });
-};
+		return issues.length ? {issues} : {value}
+	})
+}
 
 /**
- * @template [Input = unknown]
- * @template [Output = Input]
+ * @template [Input=unknown]
+ * @template [Output=Input]
  * @param {StandardSchemaV1<Input, Output>} schm
  * @param {unknown} input
  * @throws {SchemaError}
  * @returns {Output}
  */
 export function parse(schm, input) {
-  const result = v(schm, input);
-  if (result.issues) throw new SchemaError(result.issues);
-  return result.value;
+	const result = v(schm, input)
+	if (result.issues) throw new SchemaError(result.issues)
+	return result.value
 }
 
 /**
- * @template [Input = unknown]
- * @template [Output = Input]
+ * @template [Input=unknown]
+ * @template [Output=Input]
  * @param {StandardSchemaV1<Input, Output>} schm
  * @param {unknown} input
  * @returns {input is Output}
  */
 export function is(schm, input) {
-  return !v(schm, input).issues;
+	return !v(schm, input).issues
 }

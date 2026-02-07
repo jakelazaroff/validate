@@ -1,12 +1,19 @@
 {
-  "name": "jsparse",
-  "version": "1.0.0",
-  "description": "",
-  "license": "MPL-2.0",
-  "author": "",
-  "main": "jsparse.js",
-  "type": "module",
-  "scripts": {
-    "test": "node --test"
-  }
+	"name": "jsparse",
+	"version": "1.0.0",
+	"description": "",
+	"license": "MPL-2.0",
+	"author": "",
+	"main": "jsparse.js",
+	"type": "module",
+	"scripts": {
+		"test": "node --test"
+	},
+	"prettier": {
+		"useTabs": true,
+		"semi": false,
+		"trailingComma": "none",
+		"bracketSpacing": false,
+		"arrowParens": "avoid"
+	}
 }
