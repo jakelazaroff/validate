@@ -78,7 +78,7 @@ function schema(validate) {
 	return {
 		[NS]: {
 			version: 1,
-			vendor: "jsparse",
+			vendor: "validate",
 			validate
 		}
 	}

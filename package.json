@@ -1,10 +1,10 @@
 {
-	"name": "jsparse",
+	"name": "validate",
 	"version": "1.0.0",
 	"description": "",
 	"license": "MPL-2.0",
 	"author": "",
-	"main": "jsparse.js",
+	"main": "validate.js",
 	"type": "module",
 	"scripts": {
 		"test": "tsgo --project ./jsconfig.json --noEmit && node --test"
