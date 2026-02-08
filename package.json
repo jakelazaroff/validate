@@ -7,7 +7,7 @@
 	"main": "jsparse.js",
 	"type": "module",
 	"scripts": {
-		"test": "node --test"
+		"test": "tsgo --project ./jsconfig.json --noEmit && node --test"
 	},
 	"prettier": {
 		"useTabs": true,
@@ -15,5 +15,9 @@
 		"trailingComma": "none",
 		"bracketSpacing": false,
 		"arrowParens": "avoid"
+	},
+	"devDependencies": {
+		"@types/node": "^25.2.2",
+		"@typescript/native-preview": "^7.0.0-dev.20260207.1"
 	}
 }

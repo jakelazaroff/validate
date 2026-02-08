@@ -61,7 +61,7 @@ class SchemaError extends Error {
 	/** @param {readonly Issue[]} issues */
 	constructor(issues) {
 		const msg = issues
-			.map(({message, path}) => (path.length ? `- $.${path.join(".")}: ${message}` : message))
+			.map(({message, path}) => (path?.length ? `- $.${path?.join(".")}: ${message}` : message))
 			.join("\n")
 		super(msg)
 	}
@@ -102,7 +102,7 @@ const v = (schm, input) => schm[NS].validate(input)
  */
 export function custom(fn, msg) {
 	return schema(value => {
-		if (fn(value)) return {value}
+		if (fn(value)) return /** @type {SuccessResult<Output>} */ ({value})
 		return {issues: [{message: msg(value), path: []}]}
 	})
 }
@@ -142,13 +142,13 @@ export const any = custom(
  */
 export const literal = lit =>
 	custom(
-		/** @returns {v is T} */
+		/** @returns {val is T} */
 		val => val === lit,
 		formatErrFor(`\`${lit}\``)
 	)
 
 /**
- * @template {Function} T
+ * @template {abstract new (...args: any) => any} T
  * @param {T} fn
  */
 export const instance = fn =>
@@ -228,13 +228,13 @@ export const nullable = schm => union(_null, schm)
  * @returns {StandardSchemaV1<unknown, T[]>}
  */
 export const array = schm => {
-	return schema(input => {
-		if (!Array.isArray(input)) return {issues: [{message: formatErr("array", input)}]}
+	return schema(value => {
+		if (!Array.isArray(value)) return {issues: [{message: formatErr("array", value)}]}
 
 		/** @type {Issue[]} */
 		const issues = []
 
-		for (const [i, val] of input.entries()) {
+		for (const [i, val] of value.entries()) {
 			const result = v(schm, val)
 			if (result.issues) {
 				for (const issue of result.issues) {
@@ -245,7 +245,7 @@ export const array = schm => {
 		}
 
 		if (issues.length) return {issues}
-		return /** @type {SuccessResult<typeof values>} */ ({value: input})
+		return /** @type {SuccessResult<T[]>} */ ({value})
 	})
 }
 

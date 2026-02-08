@@ -4,7 +4,7 @@ import {describe, test} from "node:test"
 import * as v from "./jsparse.js"
 
 describe("primitives", () => {
-	/** @type {Record<string, [unknown, import("./validate.js").StandardSchemaV1]>} */
+	/** @type {Record<string, [unknown, import("./jsparse.js").StandardSchemaV1]>} */
 	const PRIMITIVES = {
 		bigint: [1n, v.bigint],
 		boolean: [true, v.boolean],
