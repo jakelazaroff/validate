@@ -65,22 +65,6 @@ result; // { a: string; b: number }
 
 validate.js conforms to [Standard Schema](https://standardschema.dev/schema), so you can use it anywhere you'd use another conformant validation library.
 
-## Extending
-
-Use `custom` to write your own validators. They take a type predicate and an error message function:
-
-```typescript
-import { custom, parse } from "./validate.js";
-
-const positive = custom(
-  (x): x is number => typeof x === "number" && x > 0,
-  (x) => `Expected positive number, received \`${JSON.stringify(x)}\``
-);
-
-parse(positive, 5); // 5
-parse(positive, -1); // throws
-```
-
 ## API
 
 ### `parse(schema, value)`
