@@ -38,7 +38,7 @@ describe("literal", () => {
 		const schema = v.literal("test")
 
 		/** @type {"test"} */
-		const _ = v.parse(schema, 0)
+		const _ = v.parse(schema, "test")
 	})
 
 	test("parses if value is the same as the literal", () => {
@@ -58,7 +58,7 @@ describe("instance", () => {
 		const schema = v.instance(Test)
 
 		/** @type {Test} */
-		const _ = v.parse(schema, 0)
+		const _ = v.parse(schema, new Test())
 	})
 
 	test("parses if value is an instance of the given class", () => {
@@ -79,7 +79,7 @@ describe("array", () => {
 		const schema = v.array(v.string)
 
 		/** @type {string[]} */
-		const _ = v.parse(schema, 0)
+		const _ = v.parse(schema, [])
 	})
 
 	test("parses if all elements match the given schema", () => {
@@ -103,7 +103,7 @@ describe("record", () => {
 		const schema = v.record(v.string)
 
 		/** @type {Record<string | number | symbol, string>} */
-		const _ = v.parse(schema, 0)
+		const _ = v.parse(schema, {})
 	})
 
 	test("parses if all properties match the given schema", () => {
@@ -127,7 +127,7 @@ describe("object", () => {
 		const schema = v.object({name: v.string, age: v.number})
 
 		/** @type {{name: string, age: number}} */
-		const _ = v.parse(schema, 0)
+		const _ = v.parse(schema, {name: "", age: 0})
 	})
 
 	test("parses if each property matches the corresponding schema", () => {
@@ -157,7 +157,7 @@ describe("custom", () => {
 		)
 
 		/** @type {`${string}@${string}`} */
-		const _ = v.parse(schema, 0)
+		const _ = v.parse(schema, "a@b")
 	})
 
 	test("parses if the validation function returns true", () => {
@@ -184,7 +184,7 @@ describe("union", () => {
 		const schema = v.union(v.string, v.number)
 
 		/** @type {string | number} */
-		const _ = v.parse(schema, 0)
+		const _ = v.parse(schema, "")
 	})
 
 	test("parses if value matches any of the schemas", () => {
@@ -207,11 +207,7 @@ describe("union", () => {
 	})
 
 	test("works with literal types", () => {
-		const schema = v.union(
-			v.literal("red"),
-			v.literal("green"),
-			v.literal("blue")
-		)
+		const schema = v.union(v.literal("red"), v.literal("green"), v.literal("blue"))
 		assert.doesNotThrow(() => v.parse(schema, "red"))
 		assert.doesNotThrow(() => v.parse(schema, "green"))
 		assert.doesNotThrow(() => v.parse(schema, "blue"))
@@ -224,28 +220,20 @@ describe("union", () => {
 			v.object({type: v.literal("admin"), name: v.string, level: v.number})
 		)
 		assert.doesNotThrow(() => v.parse(schema, {type: "user", name: "jake"}))
-		assert.doesNotThrow(() =>
-			v.parse(schema, {type: "admin", name: "jake", level: 5})
-		)
+		assert.doesNotThrow(() => v.parse(schema, {type: "admin", name: "jake", level: 5}))
 	})
 })
 
 describe("intersect", () => {
 	test("narrows to the intersection type", () => {
-		const schema = v.intersect(
-			v.object({name: v.string}),
-			v.object({age: v.number})
-		)
+		const schema = v.intersect(v.object({name: v.string}), v.object({age: v.number}))
 
 		/** @type {{ name: string; age: number }} */
-		const _ = v.parse(schema, 0)
+		const _ = v.parse(schema, {name: "", age: 0})
 	})
 
 	test("merges object properties", () => {
-		const schema = v.intersect(
-			v.object({name: v.string}),
-			v.object({age: v.number})
-		)
+		const schema = v.intersect(v.object({name: v.string}), v.object({age: v.number}))
 		const result = v.parse(schema, {name: "jake", age: 34})
 		assert.equal(result.name, "jake")
 		assert.equal(result.age, 34)
@@ -264,10 +252,7 @@ describe("intersect", () => {
 	})
 
 	test("fails if any schema in intersection fails", () => {
-		const schema = v.intersect(
-			v.object({name: v.string}),
-			v.object({age: v.number})
-		)
+		const schema = v.intersect(v.object({name: v.string}), v.object({age: v.number}))
 		assert.throws(() => v.parse(schema, {name: "jake"}))
 		assert.throws(() => v.parse(schema, {age: 34}))
 		assert.throws(() => v.parse(schema, {name: 123, age: "test"}))
@@ -279,7 +264,7 @@ describe("optional", () => {
 		const schema = v.optional(v.string)
 
 		/** @type {string | undefined} */
-		const _ = v.parse(schema, 0)
+		const _ = v.parse(schema, undefined)
 	})
 
 	test("works if the given type is undefined", () => {

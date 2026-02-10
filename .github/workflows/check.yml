@@ -16,6 +16,7 @@ jobs:
       - run: npm install
       - run: |
           source .github/workflows/actions.sh
+          step run: "npm install"
           step run: "npx prettier ./*.js --check"
           step run: "npm test"
           step run: "npm run typecheck"
