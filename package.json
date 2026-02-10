@@ -7,7 +7,8 @@
 	"main": "validate.js",
 	"type": "module",
 	"scripts": {
-		"test": "tsgo --project ./jsconfig.json --noEmit && node --test"
+		"test": "node --test",
+		"typecheck": "tsgo --project ./jsconfig.json --noEmit"
 	},
 	"prettier": {
 		"useTabs": true,

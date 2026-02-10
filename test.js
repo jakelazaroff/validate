@@ -34,6 +34,13 @@ describe("primitives", () => {
 })
 
 describe("literal", () => {
+	test("narrows to the literal type", () => {
+		const schema = v.literal("test")
+
+		/** @type {"test"} */
+		const _ = v.parse(schema, 0)
+	})
+
 	test("parses if value is the same as the literal", () => {
 		const schema = v.literal("test")
 		assert.doesNotThrow(() => v.parse(schema, "test"))
@@ -46,6 +53,14 @@ describe("literal", () => {
 })
 
 describe("instance", () => {
+	test("narrows to the instance type", () => {
+		class Test {}
+		const schema = v.instance(Test)
+
+		/** @type {Test} */
+		const _ = v.parse(schema, 0)
+	})
+
 	test("parses if value is an instance of the given class", () => {
 		class Test {}
 		const schema = v.instance(Test)
@@ -60,6 +75,13 @@ describe("instance", () => {
 })
 
 describe("array", () => {
+	test("narrows to the array type", () => {
+		const schema = v.array(v.string)
+
+		/** @type {string[]} */
+		const _ = v.parse(schema, 0)
+	})
+
 	test("parses if all elements match the given schema", () => {
 		const schema = v.array(v.string)
 		assert.doesNotThrow(() => v.parse(schema, ["one", "two"]))
@@ -77,6 +99,13 @@ describe("array", () => {
 })
 
 describe("record", () => {
+	test("narrows to the record type", () => {
+		const schema = v.record(v.string)
+
+		/** @type {Record<string | number | symbol, string>} */
+		const _ = v.parse(schema, 0)
+	})
+
 	test("parses if all properties match the given schema", () => {
 		const schema = v.record(v.string)
 		assert.doesNotThrow(() => v.parse(schema, {a: "one", b: "two"}))
@@ -94,6 +123,13 @@ describe("record", () => {
 })
 
 describe("object", () => {
+	test("narrows to the object type", () => {
+		const schema = v.object({name: v.string, age: v.number})
+
+		/** @type {{name: string, age: number}} */
+		const _ = v.parse(schema, 0)
+	})
+
 	test("parses if each property matches the corresponding schema", () => {
 		const schema = v.object({name: v.string, age: v.number})
 		assert.doesNotThrow(() => v.parse(schema, {name: "jake", age: 34}))
@@ -113,6 +149,17 @@ describe("object", () => {
 })
 
 describe("custom", () => {
+	test("narrows to the custom type", () => {
+		const schema = v.custom(
+			/** @returns {v is `${string}@${string}`} */
+			v => typeof v === "string" && v.includes("@"),
+			() => "error"
+		)
+
+		/** @type {`${string}@${string}`} */
+		const _ = v.parse(schema, 0)
+	})
+
 	test("parses if the validation function returns true", () => {
 		const schema = v.custom(
 			/** @returns {v is `${string}@${string}`} */
@@ -133,6 +180,13 @@ describe("custom", () => {
 })
 
 describe("union", () => {
+	test("narrows to the union type", () => {
+		const schema = v.union(v.string, v.number)
+
+		/** @type {string | number} */
+		const _ = v.parse(schema, 0)
+	})
+
 	test("parses if value matches any of the schemas", () => {
 		const schema = v.union(v.string, v.number)
 		assert.doesNotThrow(() => v.parse(schema, "test"))
@@ -171,6 +225,13 @@ describe("union", () => {
 })
 
 describe("intersect", () => {
+	test("narrows to the intersection type", () => {
+		const schema = v.intersect(v.object({name: v.string}), v.object({age: v.number}))
+
+		/** @type {{ name: string; age: number }} */
+		const _ = v.parse(schema, 0)
+	})
+
 	test("merges object properties", () => {
 		const schema = v.intersect(v.object({name: v.string}), v.object({age: v.number}))
 		const result = v.parse(schema, {name: "jake", age: 34})
@@ -199,6 +260,13 @@ describe("intersect", () => {
 })
 
 describe("optional", () => {
+	test("narrows to a union with undefined", () => {
+		const schema = v.optional(v.string)
+
+		/** @type {string | undefined} */
+		const _ = v.parse(schema, 0)
+	})
+
 	test("works if the given type is undefined", () => {
 		const schema = v.optional(v.string)
 		assert.throws(() => v.parse(schema, 123))
