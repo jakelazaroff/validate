@@ -1,4 +1,7 @@
-# ACTIONS.SH is a simple task runner
+# actions.sh v0.1.0
+#
+# ACTIONS.SH is a simple task runner written in pure bash.
+# Copy it into your project for a Github Actions–like task runner — without the lock-in.
 #
 # "Import" it by including this line at the top of your action script:
 #
@@ -26,8 +29,8 @@
 # - `env:` sets environment variables:
 #
 #     step "Greet" \
-#       run: "echo Hello, \$NAME!" \
-#       env: "NAME=jake"
+#       run: "echo \$GREETING, \$NAME!" \
+#       env: "GREETING=hello NAME=jake"
 #
 #   (Make sure to escape variable names, or it'll use variables from your action script instead.)
 #
@@ -172,34 +175,4 @@ _exec() {
 
   # return whether all the steps ran successfully
   exit $failed
-}
-
-# BUILT-IN ACTIONS
-
-# deploy to cloudflare with wrangler
-#   step \
-#     use: wrangler/deploy \
-#     apiToken: "$CLOUDFLARE_API_TOKEN" \
-#     accountId: "$CLOUDFLARE_ACCOUNT_ID" \
-#     env: "prod" \
-#     dir: "web"
-wrangler/deploy() {
-  local env="" dir="." api_token="" account_id=""
-  while [ $# -gt 0 ]; do
-    case "$1" in
-      env) env="$2"; shift 2 ;;
-      dir)         dir="$2"; shift 2 ;;
-      apiToken)    api_token="$2"; shift 2 ;;
-      accountId)   account_id="$2"; shift 2 ;;
-      *)           shift 2 ;;
-    esac
-  done
-
-  local env_flag=""
-  [ -n "$env" ] && env_flag="--env $(printf '%q' "$environment")"
-
-  cd "$dir"
-  CLOUDFLARE_API_TOKEN="$api_token" \
-  CLOUDFLARE_ACCOUNT_ID="$account_id" \
-    npx wrangler deploy $env_flag
 }
