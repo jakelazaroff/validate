@@ -123,6 +123,7 @@ _run() {
 
 # execute the steps
 _exec() {
+  set +e
   local failed=0
   local i
 
