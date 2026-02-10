@@ -207,11 +207,7 @@ describe("union", () => {
 	})
 
 	test("works with literal types", () => {
-		const schema = v.union(
-			v.literal("red"),
-			v.literal("green"),
-			v.literal("blue")
-		)
+		const schema = v.union(v.literal("red"), v.literal("green"), v.literal("blue"))
 		assert.doesNotThrow(() => v.parse(schema, "red"))
 		assert.doesNotThrow(() => v.parse(schema, "green"))
 		assert.doesNotThrow(() => v.parse(schema, "blue"))
@@ -224,28 +220,20 @@ describe("union", () => {
 			v.object({type: v.literal("admin"), name: v.string, level: v.number})
 		)
 		assert.doesNotThrow(() => v.parse(schema, {type: "user", name: "jake"}))
-		assert.doesNotThrow(() =>
-			v.parse(schema, {type: "admin", name: "jake", level: 5})
-		)
+		assert.doesNotThrow(() => v.parse(schema, {type: "admin", name: "jake", level: 5}))
 	})
 })
 
 describe("intersect", () => {
 	test("narrows to the intersection type", () => {
-		const schema = v.intersect(
-			v.object({name: v.string}),
-			v.object({age: v.number})
-		)
+		const schema = v.intersect(v.object({name: v.string}), v.object({age: v.number}))
 
 		/** @type {{ name: string; age: number }} */
 		const _ = v.parse(schema, {name: "", age: 0})
 	})
 
 	test("merges object properties", () => {
-		const schema = v.intersect(
-			v.object({name: v.string}),
-			v.object({age: v.number})
-		)
+		const schema = v.intersect(v.object({name: v.string}), v.object({age: v.number}))
 		const result = v.parse(schema, {name: "jake", age: 34})
 		assert.equal(result.name, "jake")
 		assert.equal(result.age, 34)
@@ -264,10 +252,7 @@ describe("intersect", () => {
 	})
 
 	test("fails if any schema in intersection fails", () => {
-		const schema = v.intersect(
-			v.object({name: v.string}),
-			v.object({age: v.number})
-		)
+		const schema = v.intersect(v.object({name: v.string}), v.object({age: v.number}))
 		assert.throws(() => v.parse(schema, {name: "jake"}))
 		assert.throws(() => v.parse(schema, {age: 34}))
 		assert.throws(() => v.parse(schema, {name: 123, age: "test"}))

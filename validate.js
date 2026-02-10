@@ -1,3 +1,5 @@
+// validate.js v0.1.0
+
 // STANDARD SCHEMA TYPES
 // See https://standardschema.dev
 
@@ -61,9 +63,7 @@ class SchemaError extends Error {
 	/** @param {readonly Issue[]} issues */
 	constructor(issues) {
 		const msg = issues
-			.map(({message, path}) =>
-				path?.length ? `- $.${path?.join(".")}: ${message}` : message
-			)
+			.map(({message, path}) => (path?.length ? `- $.${path?.join(".")}: ${message}` : message))
 			.join("\n")
 		super(msg)
 	}
@@ -129,10 +129,7 @@ const _undefined = custom(x => x === undefined, formatErrFor("undefined"))
 export {_null as null, _undefined as undefined}
 
 export const bigint = custom(x => typeof x === "bigint", formatErrFor("bigint"))
-export const boolean = custom(
-	x => typeof x === "boolean",
-	formatErrFor("boolean")
-)
+export const boolean = custom(x => typeof x === "boolean", formatErrFor("boolean"))
 export const number = custom(x => typeof x === "number", formatErrFor("number"))
 export const string = custom(x => typeof x === "string", formatErrFor("string"))
 export const symbol = custom(x => typeof x === "symbol", formatErrFor("symbol"))
@@ -234,8 +231,7 @@ export const nullable = schm => union(_null, schm)
  */
 export const array = schm => {
 	return schema(value => {
-		if (!Array.isArray(value))
-			return {issues: [{message: formatErr("array", value)}]}
+		if (!Array.isArray(value)) return {issues: [{message: formatErr("array", value)}]}
 
 		/** @type {Issue[]} */
 		const issues = []
@@ -244,9 +240,7 @@ export const array = schm => {
 			const result = v(schm, val)
 			if (result.issues) {
 				for (const issue of result.issues) {
-					issue.path = /** @type {PropertyKey[]} */ ([i]).concat(
-						issue.path || []
-					)
+					issue.path = /** @type {PropertyKey[]} */ ([i]).concat(issue.path || [])
 					issues.push(issue)
 				}
 			}
@@ -272,8 +266,7 @@ function isObject(input) {
  */
 export const object = schm => {
 	return schema(value => {
-		if (!isObject(value))
-			return {issues: [{message: formatErr("object", value)}]}
+		if (!isObject(value)) return {issues: [{message: formatErr("object", value)}]}
 
 		/** @type {Issue[]} */
 		const issues = []
@@ -282,9 +275,7 @@ export const object = schm => {
 			const result = v(subschm, value[key])
 			if (result.issues) {
 				for (const issue of result.issues || []) {
-					issue.path = /** @type {[PropertyKey]} */ ([key]).concat(
-						issue.path || []
-					)
+					issue.path = /** @type {[PropertyKey]} */ ([key]).concat(issue.path || [])
 					issues.push(issue)
 				}
 			}
@@ -301,8 +292,7 @@ export const object = schm => {
  */
 export const record = schm => {
 	return schema(value => {
-		if (!isObject(value))
-			return {issues: [{message: formatErr("object", value)}]}
+		if (!isObject(value)) return {issues: [{message: formatErr("object", value)}]}
 
 		/** @type {Issue[]} */
 		const issues = []
@@ -311,9 +301,7 @@ export const record = schm => {
 			const result = v(schm, val)
 			if (result.issues) {
 				for (const issue of result.issues || []) {
-					issue.path = /** @type {[PropertyKey]} */ ([key]).concat(
-						issue.path || []
-					)
+					issue.path = /** @type {[PropertyKey]} */ ([key]).concat(issue.path || [])
 					issues.push(issue)
 				}
 			}

@@ -15,7 +15,8 @@
 		"semi": false,
 		"trailingComma": "none",
 		"bracketSpacing": false,
-		"arrowParens": "avoid"
+		"arrowParens": "avoid",
+		"printWidth": 100
 	},
 	"devDependencies": {
 		"@types/node": "^25.2.2",
