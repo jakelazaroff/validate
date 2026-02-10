@@ -1,6 +1,6 @@
 # validate.js
 
-2kb vanilla JavaScript validation library with [TypeScript](https://www.typescriptlang.org) and [Standard Schema](https://standardschema.dev) support.
+2kb vanilla JavaScript validation library with [TypeScript](https://www.typescriptlang.org) and [Standard Schema](https://standardschema.dev/schema) support.
 
 ## Why validate.js?
 
@@ -32,7 +32,7 @@ is(schema, { a: "abc", b: 123 }); // true
 is(schema, 42); // false
 ```
 
-If you're using TypeScript, validate.js is even **more** useful:
+If you're using TypeScript, validate.js is even _more_ useful, statically narrowing the types of parsed objects:
 
 ```typescript
 import { parse, object, number, string } from "./validate.js";
@@ -47,7 +47,23 @@ const result = parse(schema, foo);
 result; // { a: string; b: number }
 ```
 
-validate.js conforms to [Standard Schema](https://standardschema.dev), so you can use it anywhere you'd use another conformant validation library.
+In fact, validate.js can do this even if you're using vanilla JavaScript! You can express almost the entire TypeScript type system in [JSDoc comments](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html), which means you can get the benefits of static type checking in normal JavaScript files. (That's how validate.js provides TypeScript support.)
+
+```javascript
+import { parse, object, number, string } from "./validate.js";
+
+const schema = object({
+  a: string,
+  b: number
+});
+
+/** @type {unknown} */
+const foo = { a: "abc", b: 123 };
+const result = parse(schema, foo);
+result; // { a: string; b: number }
+```
+
+validate.js conforms to [Standard Schema](https://standardschema.dev/schema), so you can use it anywhere you'd use another conformant validation library.
 
 ## Extending
 
