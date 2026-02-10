@@ -8,7 +8,7 @@ The JavaScript validation library field is crowded. Why use validate.js over [Va
 
 validate.js is _vanilla JavaScript_ — drop this file in any JavaScript or TypeScript project and it will Just Work regardless of toolchain. You might use it if you're building a website without a bundler, if you're not using TypeScript or if you just want something small and vanilla.
 
-Why _not_ use vanilla.js? If you're building a Real Production Application, you probably already have package.json set up with a bundler, in which case you may as well use one of the larger libraries (as long as they tree shake to a small bundle size).
+Why _not_ use validate.js? If you're building a Real Production Application, you probably already have package.json set up with a bundler, in which case you may as well use one of the larger libraries (as long as they tree shake to a small bundle size).
 
 ## Installing
 
@@ -21,15 +21,14 @@ Don't be put off — validate.js a single 350 line file, of which only 150 lines
 Easily validate complex types by using simple validators together:
 
 ```javascript
-import { is, object, number, string } from "./validate.js";
+import { parse, object, number, string } from "./validate.js";
 
 const schema = object({
   a: string,
   b: number
 });
 
-is(schema, { a: "abc", b: 123 }); // true
-is(schema, 42); // false
+const result = parse(schema, { a: "abc", b: 123 });
 ```
 
 If you're using TypeScript, validate.js is even _more_ useful, statically narrowing the types of parsed objects:
@@ -43,6 +42,7 @@ const schema = object({
 });
 
 const foo: unknown = { a: "abc", b: 123 };
+
 const result = parse(schema, foo);
 result; // { a: string; b: number }
 ```
@@ -59,6 +59,7 @@ const schema = object({
 
 /** @type {unknown} */
 const foo = { a: "abc", b: 123 };
+
 const result = parse(schema, foo);
 result; // { a: string; b: number }
 ```
@@ -89,7 +90,7 @@ is(string, "hello"); // true
 is(string, 42); // false
 ```
 
-### Primitive Schemas
+### Primitive Schemata
 
 #### `boolean`
 
@@ -250,9 +251,9 @@ is(schema, {}); // false
 
 ### Combinators
 
-#### `union(...schemas)`
+#### `union(...schemata)`
 
-Matches if the value matches **any** of the given schemas. Narrows to a union type.
+Matches if the value matches **any** of the given schemata. Narrows to a union type.
 
 ```typescript
 import { parse, union, number, string } from "./validate.js";
@@ -264,9 +265,9 @@ parse(schema, "one"); // number | string
 parse(schema, false); // throws
 ```
 
-#### `intersect(...schemas)`
+#### `intersect(...schemata)`
 
-Matches if the value matches **all** of the given schemas. Narrows to an intersection type.
+Matches if the value matches **all** of the given schemata. Narrows to an intersection type.
 
 ```typescript
 import { parse, intersect, object, number, string } from "./validate.js";
