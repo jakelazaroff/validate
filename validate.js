@@ -1,4 +1,4 @@
-// validate.js v0.1.0
+// validate.js v0.1.1
 
 // STANDARD SCHEMA TYPES
 // See https://standardschema.dev
@@ -181,22 +181,22 @@ export const union = (...schemata) => {
 }
 
 /**
- * Converts a union type to an intersection type;
- * see https://fettblog.eu/typescript-union-to-intersection/
- * @template T
- * @typedef {(T extends any ? (x: T) => any : never) extends (x: infer R) => any ? R : never} UnionToIntersection
- */
-
-/**
  * Simplifies an intersection type into a single object type
  * @template T
  * @typedef {T extends infer O ? { [K in keyof O]: O[K] } : never} Simplify
  */
 
 /**
+ * Recursively intersects the output types of a tuple of schemas,
+ * preserving unions within individual schemas.
+ * @template {StandardSchemaV1[]} T
+ * @typedef {T extends [infer F extends StandardSchemaV1, ...infer R extends StandardSchemaV1[]] ? InferOutput<F> & IntersectOutputs<R> : unknown} IntersectOutputs
+ */
+
+/**
  * @template {StandardSchemaV1[]} T
  * @param {T} schemata
- * @returns {StandardSchemaV1<unknown, Simplify<UnionToIntersection<InferOutput<T[number]>>>>}
+ * @returns {StandardSchemaV1<unknown, Simplify<IntersectOutputs<T>>>}
  */
 export const intersect = (...schemata) => {
 	return schema(value => {

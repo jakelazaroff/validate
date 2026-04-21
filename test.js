@@ -251,6 +251,23 @@ describe("intersect", () => {
 		assert.equal(result.email, "j@e.com")
 	})
 
+	test("preserves unions within intersected schemas", () => {
+		const schema = v.intersect(
+			v.object({foo: v.string}),
+			v.union(v.object({bar: v.number}), v.object({baz: v.number}))
+		)
+		const result = v.parse(schema, {foo: "", bar: 0})
+
+		/** @type {{ foo: string; bar: number } | { foo: string; baz: number }} */
+		const _ = result
+
+		/** @type {{ foo: string; bar: number; baz: number }} */
+		let wrong
+
+		// @ts-expect-error - should not collapse the union into a single object
+		wrong = result
+	})
+
 	test("fails if any schema in intersection fails", () => {
 		const schema = v.intersect(v.object({name: v.string}), v.object({age: v.number}))
 		assert.throws(() => v.parse(schema, {name: "jake"}))
